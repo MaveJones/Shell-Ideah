@@ -89,7 +89,7 @@ void runPwdCommand(){
  @param pos_q_job É a posição do job na fila de processo.
 */
 void runKillCommand(int pos_q_job) {
-	if(pos_q_job <= 50 && pos_q_job > 0 && pos_q_job < posicao){
+	if(pos_q_job <= 50 && pos_q_job > 0 && pos_q_job <= posicao){
 	  kill(queue[pos_q_job-1].pid,9);                       /**< Mata o job, kill(pid,signal) o signal utilizado é o 9 pois é o "hard kill". */
 	  printf("PID: %d\n",queue[pos_q_job-1].pid);            
 	  printf("O processo { %d } foi finalizado\n",pos_q_job);
