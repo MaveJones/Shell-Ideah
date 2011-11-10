@@ -12,12 +12,11 @@
 //Estrutura que representa os comandos
 typedef struct command_t {
   char *name;
-  char *pwd;
   int argc;
   char **argv;
 } CommandType;
 
-//Estrutura que representa a fila
+//Estrutura que representa a fila 
 typedef struct queue {
     int pos_q;
     char *status;

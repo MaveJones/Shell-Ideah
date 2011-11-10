@@ -6,10 +6,11 @@
 Queue queue[50];
 int posicao = 0;
 
-
-//Função de manipulação da fila, do início ao fim os processos
-//são passados para baixo, shift para esquerda.
-
+/**
+  @brief Função de manipulação da fila, do início ao fim os processos são passados para baixo, shift para esquerda.
+  @param q[] fila de processo.
+  @param posC posição do processo atual.
+ */
 void desempilhar(Queue q[], int posC) {
   int i;
   for (i=posC+1; i<posicao; i++) {
@@ -20,11 +21,11 @@ void desempilhar(Queue q[], int posC) {
   }
 }
 
-//Função que encontra o caminho de um comando, este comando é o
-// parametro de entrada da função.
-//Retorna NULL se não encontrar o comando e retorna o caminho do
-// comando se encontrar.
-
+/**
+  @brief Função que encontra o caminho de um comando, este comando é o parametro de entrada da função.
+  @param command Representa o comando a ser executado.
+  @return Retorna NULL se não encontrar o comando e retorna o caminho do comando se encontrar.
+ */
 char* getCommandPath(char* command) {
 
   FILE *fpin;
@@ -33,21 +34,22 @@ char* getCommandPath(char* command) {
   char *temp;
   char *path;
 
-  temp = (char *)calloc(1024, sizeof(char));            //Calloc utilizado para evitar que seja criado com sujeira
-  path = (char *) getenv("PATH");                       //Retorna o caminho do ambiente PATH
+  temp = (char *)calloc(1024, sizeof(char));            /**< Calloc utilizado para evitar que seja criado com sujeira */
+  path = (char *) getenv("PATH");                       /**< Retorna o caminho do ambiente PATH */
 
   strcpy(p,path);
-  path = strtok (p,":");                                //Tokeniza até o primeiro PATH
+  path = strtok (p,":"); 
+//!Tokeniza até o primeiro PATH
   while ( path != NULL ) {
     strcpy ( temp, path );
-    strcat ( temp, "/" );                               //Adiciona o / no final do caminho
-    strcat ( temp, command );                           //Adiciona o comando no final
-    if ( ( fpin = fopen ( temp, "r" ) ) == NULL ) {     //Testa para verificar se o caminho é aceito
+    strcat ( temp, "/" );                               /**< Adiciona o / no final do caminho */
+    strcat ( temp, command );                           /**< Adiciona o comando no final */
+    if ( ( fpin = fopen ( temp, "r" ) ) == NULL ) {     /**< Testa para verificar se o caminho é aceito */
       temp[0] = '\0';                                       //Joga fora o conteúdo caso o teste tenha sido NULL
       path = strtok ( ( char * ) 0, ":" );                  //Recebe o proximo PATH
     }
     else {
-      break;                                            //O caminhdo é válido
+      break;                                            /**< O caminhdo é válido */
     }
   }
   if ( fpin == NULL ) {
@@ -58,34 +60,37 @@ char* getCommandPath(char* command) {
   }
 }
 
- //Faz uma cópia do comando desejado,parametro de entrada,
- // e retorna essa cópia.
-
+/**
+ @brief Faz uma cópia do comando desejado,parametro de entrada, e retorna essa cópia.
+ @param command Representa o comando a ser executado.
+ @return Retorna o caminho completo do comando de entrada.
+ */
 char* getCommandName(char* command) {
 
   char *temp;
 
-  temp = (char *)calloc(1024, sizeof(char));            //Calloc utilizado para evitar que seja criado com sujeira
+  temp = (char *)calloc(1024, sizeof(char));            /**< Calloc utilizado para evitar que seja criado com sujeira */
   strcpy(temp, command);
 
   return temp;
 }
 
-//Função que encontra o caminho do Workspace
-//Retorna o caminho atual de trabalho
-
+/**
+ @brief Função que encontra o caminho do Workspace.
+ @return Retorna o caminho atual de trabalho.
+ */
 void runPwdCommand(){
   printf("%s\n", get_current_dir_name());
 }
 
-//Função que mata o job que está sendo executado
-//A entrada "pos_q_job" é a posição do job na queue
-// de processo.
-
+/**
+ @brief Função que mata o job que está sendo executado.
+ @param pos_q_job É a posição do job na fila de processo.
+*/
 void runKillCommand(int pos_q_job) {
-	if(pos_q_job <= 50 && pos_q_job > 0){
-	  kill(queue[pos_q_job-1].pid,9);                       //Mata o job, kill(pid,signal) o signal utilizado é o 9
-	  printf("PID: %d\n",queue[pos_q_job-1].pid);           // pois é o "hard kill".
+	if(pos_q_job <= 50 && pos_q_job > 0 && pos_q_job <= posicao){
+	  kill(queue[pos_q_job-1].pid,9);                       /**< Mata o job, kill(pid,signal) o signal utilizado é o 9 pois é o "hard kill". */
+	  printf("PID: %d\n",queue[pos_q_job-1].pid);            
 	  printf("O processo { %d } foi finalizado\n",pos_q_job);
 	  desempilhar(queue,pos_q_job-1);
 	  posicao--;
@@ -93,8 +98,10 @@ void runKillCommand(int pos_q_job) {
         }
 }
 
-//Manda um processo existente para background
-
+/**
+  @brief Manda um processo existente para background.
+  @param pos_q_job É a posição do job na fila de processo.
+ */
 void runBgCommand(int pos_q_job) {
  	if(pos_q_job <= 50 && pos_q_job > 0){
 	  signal(SIGSTOP,queue[pos_q_job-1].pid);
@@ -103,8 +110,10 @@ void runBgCommand(int pos_q_job) {
  	}
 }
 
-
-//Manda um processo existente para foreground
+/**
+ @brief Manda um processo existente para foreground.
+ @param pos_q_job É a posição do job na fila de processo.
+ */
 void runFgCommand(int pos_q_job) {
 	if(pos_q_job <= 50 && pos_q_job > 0){		  	
 	  signal(SIGCONT,queue[pos_q_job-1].pid);
@@ -113,40 +122,23 @@ void runFgCommand(int pos_q_job) {
 	}
 }
 
-
-//Roda o comando(command) normalmente,
-// sem a utilização de nenhum parametro.
-//Retorna 0 em caso de sucesso e 1 em
-// caso de falha.
-
+/**
+ @brief Roda o comando(command) normalmente, sem a utilização de nenhum parametro.
+ @param command Comando a ser executado em foreground.
+ @return Retorna 0 em caso de sucesso e 1 em caso de falha.
+ */
 int runCommand(CommandType* command) {
   int pid;
   int status;
-  char* filename;
-  int tam;
-
-  tam = strlen(command->name);
-  char aux1[tam+1];
-  strcpy(aux1,command->name);
-				
-  if ((aux1[0] == '.') && (aux1[1] == '/')) {			   
-     memmove(command->name,command->name+2,tam-1);
-     filename = command->pwd;
-     strcat (filename, "/" );	
-     strcat (filename, command->name);	
-     printf("%s\n",filename);
-     return 1;		   
-  }else{
-	filename = getCommandPath(command->name);
-  }
-  
+  char* filename;            
+	    
+  filename = getCommandPath(command->name);
   if(filename == NULL) {
     printf("Comando nao encontrado!\n");
     return 1;
   }
-  pid = fork();                                         // Cria o novo processo filho.
-                                                        // Atribui os valores para cada
-  if (posicao < TOPO) {                                 //campo da fila.
+  pid = fork();                                         /**< Cria o novo processo filho. Atribui os valores para cada campo da fila. */
+  if (posicao < TOPO) {                                 
     queue[posicao].command = getCommandName(command->name);
     queue[posicao].pos_q = posicao + 1;
     queue[posicao].status = "ATIVO";
@@ -159,23 +151,23 @@ int runCommand(CommandType* command) {
     return 1;
   }
   else if(pid == 0) {
-    execv(filename, command->argv);                     //Executa o comando filename, com os
-    return 1;                                           // os argumentos contidos em ARGV
+    execv(filename, command->argv);                     /**< Executa o comando filename, com os argumentos contidos em ARGV. */
+    return 1;                                           
   }
   else {
     //printf("\nProcesso sendo executado.\n");
-    while(wait(&status) != pid);                        //Espera a execução terminar.
+    while(wait(&status) != pid);                        /**< Espera a execução terminar. */
     //printf("\nProcesso parou de ser executado.\n");
     queue[posicao-1].status = "SUSPENSO";	
   }
   return 0;
 }
 
-//Roda o comando(command) em background,
-// sem a utilização de nenhum parametro.
-//Retorna 0 em caso de sucesso e 1 em
-// caso de falha.
-
+/**
+ @brief Roda o comando(command) em background, sem a utilização de nenhum parametro.
+ @param command Comando a ser executado em background.
+ @return Retorna 0 em caso de sucesso e 1 em caso de falha.
+ */
 int runConcurrentCommand(CommandType* command) {
   int pid;
   char* filename;
@@ -186,9 +178,9 @@ int runConcurrentCommand(CommandType* command) {
     return 1;
   }
 
-  pid = fork();                                         // Cria o novo processo filho.
-                                                        // Atribui os valores para cada
-  if (posicao < TOPO) {                                 //campo da fila.
+  pid = fork();                                         /**< Cria o novo processo filho. Atribui os valores para cada campo da fila. */
+                                                        
+  if (posicao < TOPO) {                                 
     queue[posicao].command = getCommandName(command->name);
     queue[posicao].pos_q = posicao + 1;
     queue[posicao].status = "ATIVO";
@@ -205,35 +197,37 @@ int runConcurrentCommand(CommandType* command) {
     execv(filename, command->argv);
     return 1;
   }
-  else {                                                //Parte que trata a execução em BG.
-                                                        //Não fica esperando o término do processo.
+  else {                                                /**< Parte que trata a execução em BG. Não fica esperando o término do processo. */
     //printf("\nProcesso sendo executado em background.\n");
   }
   return 0;
 }
 
-
-//Mostra todos os processos sendo executados por essa SHELL
+/**
+ @brief Mostra todos os processos sendo executados por essa SHELL
+ */
 void runJobsCommand(){
     int i;
     for(i=0; i<posicao; i++)
         printf("[%d] %s %s %d\n", queue[i].pos_q, queue[i].status, queue[i].command, queue[i].pid);
 }
 
-//Executa mais de um comando por vez
-//Command = Primeiro executável
-//Command2 = Segundo executável
-//Retorna 0 para falha e 1 para sucesso
+/**
+ @brief Executa mais de um comando por vez.
+ @param command Primeiro comando a ser executado.
+ @param command2 Segundo comando a ser executado.
+ @return Retorna 0 para falha e 1 para sucesso
+ */
 int runPipedCommands(CommandType* command, CommandType* command2) {
   int status;
 
-                                                        //Trata o primeiro command
+                                                        //! Trata o primeiro command
   char* filename = getCommandPath(command->name);
   if(filename == NULL) {
     printf("%s Comando nao encontrado!\n", command->name);
     return 1;
   }
-                                                        //Trata o segundo command
+                                                        //! Trata o segundo command
   char* filename2 = getCommandPath(command2->name);
   if(filename2 == NULL) {
     printf("%s Comando nao encontrado!\n", command2->name);
@@ -274,26 +268,28 @@ int runPipedCommands(CommandType* command, CommandType* command2) {
       return 1;
     }
     else {
-      close(fd[0]);                                     //Fecha o processo
-      close(fd[1]);                                     //Fecha o processo
+      close(fd[0]);                                     /**< Fecha o processo */
+      close(fd[1]);                                     /**< Fecha o processo */
       while (wait(&status) != pid2);
     }
   }
   return 0;
 }
 
-//Redirecionamento de entrada e saída
-//command = comando a ser executado
-//file = arquivo para ser redirecionado
-//fileid = descritor do arquivo
-//Retorna 0 com sucesso e 1 com falha
+/**
+ @brief Redirecionamento de entrada e saída
+ @param command Comando a ser executado
+ @param file Arquivo para ser redirecionado
+ @param fileid Descritor do arquivo
+ @return Retorna 0 com sucesso e 1 com falha
+ */
 
 int runRedirectedCommand(CommandType* command, char* file, int fileid) {
 
   int status;
   char* filename = getCommandPath(command->name);
 
-                                                        //Trata o command
+                                                        //! Trata o command
   if(filename == NULL) {
     printf("%s Comando nao existente\n", command->name);
     return 1;
@@ -307,12 +303,12 @@ int runRedirectedCommand(CommandType* command, char* file, int fileid) {
   if (pid == 0) {
     int fid;
     if(fileid == STDIN) {
-      fid = open(file, O_RDONLY, 0600);                 //0600 utilizado para criar um arquivo privado
+      fid = open(file, O_RDONLY, 0600);                 /**< 0600 utilizado para criar um arquivo privado */
     }
     else if (fileid == STDOUT) {
       fid = open(file, O_CREAT | O_TRUNC | O_WRONLY, 0600);
     }
-    dup2(fid, fileid);
+    dup2(fid, fileid);                                  /**< Troca o descritor do processo para redirecionar o novo comando. */ 
     close(fid);
 
     execv(filename,command->argv);
@@ -320,7 +316,7 @@ int runRedirectedCommand(CommandType* command, char* file, int fileid) {
     return 1;
   }
   else {
-    while (wait(&status) != pid);                       //Aguarda a execução
+    while (wait(&status) != pid);                       /**< Aguarda a execução */
   }
 
   return 0;
