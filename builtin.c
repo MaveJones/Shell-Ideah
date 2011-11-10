@@ -40,7 +40,6 @@ char* getCommandPath(char* command) {
   strcpy(p,path);
   path = strtok (p,":"); 
 //!Tokeniza até o primeiro PATH
-
   while ( path != NULL ) {
     strcpy ( temp, path );
     strcat ( temp, "/" );                               /**< Adiciona o / no final do caminho */
