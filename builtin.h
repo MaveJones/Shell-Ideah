@@ -16,7 +16,11 @@ typedef struct command_t {
   char **argv;
 } CommandType;
 
+<<<<<<< HEAD
 //Estrutura que representa a fila
+=======
+//Estrutura que representa a fila 
+>>>>>>> upstream/master
 typedef struct queue {
     int pos_q;
     char *status;
