@@ -1,3 +1,5 @@
+//Francisco Roza de Moraes 6427146
+//Vitor Faglioni Rossi     6427167
 #include "IdeaH.h"
 #include "parser.h"
 
@@ -8,12 +10,12 @@
 void stringRepair(char* string) {
   char* p = string ;
   size_t n ;
-  while (isspace(*p))
+  while (isspace(*p))				//Chega no primeiro espaço em branco//
     ++p ;
-  if ((n = strlen(p)) > 0)
+  if ((n = strlen(p)) > 0)			//Vai do final da string até o ultimo espaço em branco//
     while (isspace(p[n-1]))
       --n ;
-  ((char*)memmove(string, p, n))[n] = '\0' ;
+  ((char*)memmove(string, p, n))[n] = '\0' ;	// Faz o tratamento para remover os espaços em branco e coloca \0 no final
 }
 
 /**
