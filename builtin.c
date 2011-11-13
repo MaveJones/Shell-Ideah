@@ -1,3 +1,5 @@
+//Francisco Roza de Moraes 6427146
+//Vitor Faglioni Rossi     6427167
 #include "builtin.h"
 #include <sys/types.h>
 #include <pwd.h>
@@ -138,7 +140,7 @@ int runCommand(CommandType* command) {
     return 1;
   }
   pid = fork();                                         /**< Cria o novo processo filho. Atribui os valores para cada campo da fila. */
-  if (posicao < TOPO) {                                 
+  if (posicao < TOPO) {                                 /**< Adiciona na fila de processo*/
     queue[posicao].command = getCommandName(command->name);
     queue[posicao].pos_q = posicao + 1;
     queue[posicao].status = "ATIVO";
@@ -146,15 +148,15 @@ int runCommand(CommandType* command) {
     printf("PID: %d",queue[posicao].pid);
     posicao++;
   }
-  if(pid < 0) {
+  if(pid < 0) {						/**< Processo nao criado com sucesso */
     printf("\nErro na criacao do processo.\n");
     return 1;
   }
-  else if(pid == 0) {
-    execv(filename, command->argv);                     /**< Executa o comando filename, com os argumentos contidos em ARGV. */
+  else if(pid == 0) {					/**< Processo filho*/
+    execv(filename, command->argv);                     /**< Executa o comando filename, com o argumento contido em ARGV. */
     return 1;                                           
   }
-  else {
+  else {						/**< Processo pai*/
     //printf("\nProcesso sendo executado.\n");
     while(wait(&status) != pid);                        /**< Espera a execução terminar. */
     //printf("\nProcesso parou de ser executado.\n");
@@ -180,7 +182,7 @@ int runConcurrentCommand(CommandType* command) {
 
   pid = fork();                                         /**< Cria o novo processo filho. Atribui os valores para cada campo da fila. */
                                                         
-  if (posicao < TOPO) {                                 
+  if (posicao < TOPO) {                                 /**< Adiciona na fila de processo*/
     queue[posicao].command = getCommandName(command->name);
     queue[posicao].pos_q = posicao + 1;
     queue[posicao].status = "ATIVO";
@@ -189,15 +191,15 @@ int runConcurrentCommand(CommandType* command) {
     posicao++;
   }
 
-  if (pid < 0) {
+  if (pid < 0) {					/**< Processo nao criado com sucesso */
     printf("\nErro na criacao do processo.\n");
     return 1;
   }
-  else if(pid == 0) {
-    execv(filename, command->argv);
+  else if(pid == 0) {					/**< Processo filho*/
+    execv(filename, command->argv);			/**< Executa o comando filename, com o argumento contido em ARGV. */
     return 1;
   }
-  else {                                                /**< Parte que trata a execução em BG. Não fica esperando o término do processo. */
+  else {                                                /**< Parte que trata a execução em BG. Processo pai não fica esperando o término do processo filho. */
     //printf("\nProcesso sendo executado em background.\n");
   }
   return 0;
@@ -237,7 +239,7 @@ int runPipedCommands(CommandType* command, CommandType* command2) {
   int fd[2];
   int pid, pid2;
 
-  if(pipe(fd) == -1) {
+  if(pipe(fd) == -1) {					//! Cria um canal de comunicação entre os comandos
     printf("Erro no PIPE.\n");
     return 1;
   }
@@ -246,7 +248,7 @@ int runPipedCommands(CommandType* command, CommandType* command2) {
     return 1;
   }
 
-  if (pid == 0) {
+  if (pid == 0) {					//! Comando 1 será executado no processo filho (PID1)
     close(fd[1]);
     dup2(fd[0], 0);
     close(fd[0]);
@@ -259,7 +261,7 @@ int runPipedCommands(CommandType* command, CommandType* command2) {
       printf("Erro na criacao do processo.\n");
       return 1;
     }
-    if(pid2 == 0) {
+    if(pid2 == 0) {					//! Comando 2 será executado no processo filho (PID2)
       close(fd[0]);
       dup2(fd[1], 1);
       close(fd[1]);
@@ -270,7 +272,7 @@ int runPipedCommands(CommandType* command, CommandType* command2) {
     else {
       close(fd[0]);                                     /**< Fecha o processo */
       close(fd[1]);                                     /**< Fecha o processo */
-      while (wait(&status) != pid2);
+      while (wait(&status) != pid2);			/**< Espera o comando2 terminar de executar*/
     }
   }
   return 0;

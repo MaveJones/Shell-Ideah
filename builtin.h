@@ -1,3 +1,5 @@
+//Francisco Roza de Moraes 6427146
+//Vitor Faglioni Rossi     6427167
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

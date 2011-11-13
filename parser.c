@@ -1,3 +1,5 @@
+//Francisco Roza de Moraes 6427146
+//Vitor Faglioni Rossi     6427167
 #include "parser.h"
 #include "builtin.h"
 
@@ -22,39 +24,39 @@ void parse(char *input){
   redirectionType = DEFAULT;
   redirectionFilename = (char *)calloc(1024, sizeof(char));
 
-//!Verifica se o comando não é vazio.
+//!Verifica se o comando não é vazio, não for . e não for .. 
   if((strcmp(input, "") != 0) && (strcmp(input, ".") != 0) && (strcmp(input, "..") != 0)) {
     //!Verifica se o comando é para sair da shell
    if((strcmp(input, "quit")== 0) || (strcmp(input, "exit")== 0)) {
       printf("Finalizando a SHELL\n");
       exit(0);
     }
-    //!verifica se o comando é o PWD
+    //!Verifica se o comando é o PWD(mostra o caminho até a pasta atual)
     if(strcmp(input, "pwd")== 0){
         runPwdCommand();
     } else{
-        //!verifica se o comando é o JOBS
+        //!Verifica se o comando é o JOBS(listar todos os processos na fila)
         if(strcmp(input, "jobs")== 0){
             runJobsCommand();
         } else{
         //!Inicia os arrays de argumentos
             command->argv = (char**)calloc(256, sizeof(char*));
             command2->argv = (char**)calloc(256, sizeof(char*));    
-            /**< Quebra a string no comando */
+            /**< Quebra a string e popula command*/
             ptr = strtok(input, " ");
             command->name = ptr;
 	    command->argv[0] = ptr;
             command->argc = 1;
             count = 1;
             runmode = NORMALMODE;
-            ptr = strtok(NULL, " ");   
+            ptr = strtok(NULL, " ");/**< Procura se existe algo após o comando*/   
             while (ptr != NULL) {     
-                if(strcmp(ptr, "|")==0) { /**< Utiliza | pipe */              
+                if(strcmp(ptr, "|")==0) { /**< Utiliza | pipe(executa 2 programas ao mesmo tempo) */              
                     if(piped) {
                         printf("ERRO! Soh eh suportado um pipe.\n");
                     }
                     else {
-                     //! Le o argumento
+                     //! Le depois do | e coloca como segundo comando
                         piped = TRUE;
                         ptr = strtok (NULL, " ");
                         if(ptr != NULL) {
@@ -92,7 +94,7 @@ void parse(char *input){
                     }
                 }
                 else {
-                    if (piped) {
+                    if (piped) {/**< Trata o parametro depois de cada comando*/
                         command2->argv[count++] = ptr;
                         command2->argc++;
                     }
@@ -105,10 +107,10 @@ void parse(char *input){
                 ptr = strtok (NULL, " ");
             }
            
-            if(piped) {
+            if(piped) {/**<Roda se tiver | */
                 runPipedCommands(command, command2);
             }
-            else if(redirectionType != DEFAULT) {
+            else if(redirectionType != DEFAULT) { /**<Roda se tiver entrada ou saida de argumento*/
                 runRedirectedCommand(command, redirectionFilename, redirectionType);
             }
             else {
@@ -137,39 +139,13 @@ void parse(char *input){
                 }     
                 else if(strcmp(command->argv[0],"cd") == 0) { /**< Mudar de diretório */
                         if (command->argc == 2) {
-                            if(chdir(command->argv[1]) != 0) { /**< diferente de 0 muda o diretório */
+                            if(chdir(command->argv[1]) != 0) { /**< Igual 0 muda o diretório */
                                 printf("Diretorio invalido.\n");
                             }
                         }
                         else {
                             printf("Uso incorreto de CD\n");
                         }
-                }
-                else if (strcmp(command->argv[0],"getenv") == 0) { /**< mostra o ambiente */
-                        if (command->argc == 2) {
-                            char* variable = (char *) getenv(command->argv[1]);
-                            if (variable == NULL) {
-                                printf("Erro, ambiente invalido.\n");
-                            }
-                            else {
-                                printf("%s\n", variable);
-                            }
-                        }
-                        else {
-                            printf("Erro, Uso incorreto de Getenv.\n");
-                        }   
-                }
-                else if(strcmp(command->argv[0],"setenv") == 0) {
-                    if (command->argc == 3) {
-                        char* value = (char*)calloc(1024,sizeof(char));
-                        strcpy(value, command->argv[1]);
-                        strcat(value, "=");
-                        strcat(value, command->argv[2]);
-                        putenv(value);
-                    }
-                    else {
-                        printf("Erro, Uso incorreto de Setenv.\n");
-                    }
                 }
                 else {/**< Roda o comando em background */
                     if (runmode == NORMALMODE) {/**< NORMALMODE = 0 */
